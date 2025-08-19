@@ -29,7 +29,7 @@ WORKDIR /app
 COPY . .
 
 # Install Python dependencies
-RUN uv sync --frozen
+RUN uv sync
 
 # Expose port for the application
 EXPOSE 8080
