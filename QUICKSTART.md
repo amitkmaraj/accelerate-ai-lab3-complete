@@ -8,7 +8,7 @@ Get your production ADK agent running on Cloud Run with GPU in 15 minutes!
 # Set your Google Cloud project
 export PROJECT_ID="your-project-id"
 gcloud config set project $PROJECT_ID
-gcloud config set run/region us-central1
+gcloud config set run/region europe-west1
 
 # Enable APIs
 gcloud services enable run.googleapis.com cloudbuild.googleapis.com aiplatform.googleapis.com
@@ -37,21 +37,20 @@ gcloud run deploy ollama-gemma34b-gpu \
 
 ```bash
 # Clone and navigate to lab
-cd accelerate-ai-lab3
+cd accelerate-ai-lab3-complete/adk-agent
 
 # Create environment file
 cat > .env << EOF
 GOOGLE_CLOUD_PROJECT=$PROJECT_ID
-GOOGLE_CLOUD_LOCATION=us-central1
+GOOGLE_CLOUD_LOCATION=europe-west1
 GEMMA_MODEL_NAME=gemma3:4b
-LLAMA_MODEL_NAME=llama3.2:3b
 OLLAMA_API_BASE=https://ollama-gemma-795845071313.europe-west1.run.app
 EOF
 
 # Deploy with GPU support
 gcloud run deploy production-adk-agent \
     --source . \
-    --region us-central1 \
+    --region europe-west1 \
     --allow-unauthenticated \
     --memory 4Gi \
     --cpu 2 \
@@ -60,9 +59,8 @@ gcloud run deploy production-adk-agent \
     --max-instances 5 \
     --min-instances 1 \
     --set-env-vars GOOGLE_CLOUD_PROJECT=$PROJECT_ID \
-    --set-env-vars GOOGLE_CLOUD_LOCATION=us-central1 \
+    --set-env-vars GOOGLE_CLOUD_LOCATION=europe-west1 \
     --set-env-vars GEMMA_MODEL_NAME=gemma3:4b \
-    --set-env-vars LLAMA_MODEL_NAME=llama3.2:3b \
     --set-env-vars OLLAMA_API_BASE=https://ollama-gemma-795845071313.europe-west1.run.app
 ```
 
@@ -71,7 +69,7 @@ gcloud run deploy production-adk-agent \
 ```bash
 # Get service URL
 export SERVICE_URL=$(gcloud run services describe production-adk-agent \
-    --region=us-central1 \
+    --region=europe-west1 \
     --format='value(status.url)')
 
 # Test health endpoint
@@ -110,8 +108,5 @@ Your production ADK agent is now running on Cloud Run with GPU acceleration!
 
 - "Tell me about artificial intelligence"
 - "What are some creative writing tips?"
-
-**Llama Agent** (With Tools):
-
-- "What's the weather like in New York?"
-- "Calculate tip for a $45.50 bill with 20% tip"
+- "Explain quantum computing in simple terms"
+- "Can you help me brainstorm ideas for a blog post?"

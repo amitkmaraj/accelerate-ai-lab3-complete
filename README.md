@@ -14,19 +14,15 @@ By the end of this lab, you will:
 
 ## 🏗️ What You'll Build
 
-You'll deploy **Two Production Agents** with different capabilities:
+You'll deploy a **Production Gemma Agent** with conversational capabilities:
 
-**Gemma Agent** (Conversational):
+**Gemma Agent** (GPU-Accelerated):
 
 - General conversations and Q&A
 - Educational explanations
 - Creative writing assistance
-- No tool calling (Gemma limitation)
-
-**Llama Agent** (With Tools):
-
-- **Weather Information**: Get current weather conditions for major cities worldwide
-- **Tip Calculator**: Calculate tips and split restaurant bills easily
+- GPU-accelerated inference for fast responses
+- Production-ready deployment on Cloud Run
 
 ## 📋 Prerequisites
 
@@ -45,28 +41,30 @@ Let's first explore the agent we'll be deploying:
 
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   User Request  │ -> │  Gemma Agent    │ -> │  Gemma Model    │
-│                 │    │  (Conversational)│    │  (Cloud Run)    │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   User Request  │ -> │  Llama Agent    │ -> │  Llama Model    │
-│                 │    │  (With Tools)   │    │  (Cloud Run)    │
+│   User Request  │ -> │   ADK Agent     │ -> │  Gemma Backend  │
+│                 │    │  (Cloud Run)    │    │ (Cloud Run+GPU) │
 └─────────────────┘    └─────────────────┘    └─────────────────┘
                               │
                               v
                        ┌─────────────────┐
-                       │  Weather & Tip  │
-                       │     Tools       │
+                       │ FastAPI Server  │
+                       │ Health Checks   │
+                       │ Load Testing    │
                        └─────────────────┘
 ```
 
 #### Key Components
 
-- **`production_agent/agent.py`**: Dual ADK agents - Gemma (conversational) and Llama (with tools)
-- **`server.py`**: FastAPI server with health checks and feedback endpoints
-- **`Dockerfile`**: Container configuration for Cloud Run deployment
-- **`load_test.py`**: Locust-based load testing script
+**Ollama Backend (separate deployment):**
+
+- **`ollama-backend/Dockerfile`**: Container configuration for Gemma model backend
+
+**ADK Agent (separate deployment):**
+
+- **`adk-agent/production_agent/agent.py`**: Production Gemma agent with conversational capabilities
+- **`adk-agent/server.py`**: FastAPI server with health checks and feedback endpoints
+- **`adk-agent/Dockerfile`**: Container configuration for Cloud Run deployment
+- **`adk-agent/load_test.py`**: Locust-based load testing script
 
 ### Part 2: Local Development and Testing (15 minutes)
 
@@ -76,14 +74,13 @@ Before deploying to production, let's test the agent locally:
 
 ```bash
 # Navigate to the lab directory
-cd accelerate-ai-lab3
+cd accelerate-ai-lab3-complete/adk-agent
 
 # Create and configure environment file
 cat > .env << EOF
 GOOGLE_CLOUD_PROJECT=your-project-id
-GOOGLE_CLOUD_LOCATION=us-central1
+GOOGLE_CLOUD_LOCATION=europe-west1
 GEMMA_MODEL_NAME=gemma3:4b
-LLAMA_MODEL_NAME=llama3.2:3b
 OLLAMA_API_BASE=https://ollama-gemma-795845071313.europe-west1.run.app
 EOF
 
@@ -113,12 +110,8 @@ Try these sample interactions:
 - "Tell me about artificial intelligence"
 - "What are some creative writing tips?"
 - "Explain how photosynthesis works"
-
-**With Llama Agent** (Tools):
-
-- "What's the weather like in New York?"
-- "Calculate the tip for a $45.50 bill with 20% tip"
-- "How's the weather in Tokyo today?"
+- "Can you help me brainstorm ideas for a blog post?"
+- "What's the difference between machine learning and deep learning?"
 
 ### Part 3: Containerization (10 minutes)
 
@@ -165,7 +158,7 @@ export PROJECT_ID="your-project-id"
 gcloud config set project $PROJECT_ID
 
 # Set the region (choose one with GPU availability)
-export REGION="us-central1"
+export REGION="europe-west1"
 gcloud config set run/region $REGION
 
 # Enable required APIs
@@ -193,7 +186,6 @@ gcloud run deploy production-adk-agent \
     --set-env-vars GOOGLE_CLOUD_PROJECT=$PROJECT_ID \
     --set-env-vars GOOGLE_CLOUD_LOCATION=$REGION \
     --set-env-vars GEMMA_MODEL_NAME=gemma3:4b \
-    --set-env-vars LLAMA_MODEL_NAME=llama3.2:3b \
     --set-env-vars OLLAMA_API_BASE=https://ollama-gemma-795845071313.europe-west1.run.app \
     --no-cpu-throttling
 ```
@@ -242,11 +234,8 @@ Try both agents' capabilities:
 
 - "What's the difference between machine learning and deep learning?"
 - "Can you help me brainstorm ideas for a blog post?"
-
-**Llama Agent** (Tools):
-
-- "What's the weather like in London?"
-- "I need to calculate a 18% tip on a $67.80 bill"
+- "Explain quantum computing in simple terms"
+- "Tell me about renewable energy benefits"
 
 ### Part 6: Load Testing and Performance Validation (10 minutes)
 
@@ -274,7 +263,7 @@ locust -f load_test.py \
 - **Duration**: 60 seconds
 - **Users**: 20 concurrent users
 - **Spawn Rate**: 2 users per second
-- **Scenarios**: Gemma conversations, Llama tool usage (weather/tips), health checks
+- **Scenarios**: Gemma conversations, health checks, performance validation
 
 #### 2. Analyze Results
 

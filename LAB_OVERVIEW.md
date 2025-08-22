@@ -3,20 +3,21 @@
 ## 📁 Lab Structure
 
 ```
-accelerate-ai-lab3/
+accelerate-ai-lab3-complete/
 ├── README.md                    # Complete lab instructions (main file)
 ├── QUICKSTART.md               # 15-minute quick start guide
 ├── LAB_OVERVIEW.md            # This overview file
-├── pyproject.toml             # Python dependencies and project config
-├── Dockerfile                 # Container configuration for Cloud Run
-├── .dockerignore             # Files to exclude from Docker build
-├── .gitignore               # Git ignore patterns
-├── env.template             # Environment variable template
-├── server.py                # FastAPI server with ADK integration
-├── load_test.py            # Locust load testing script
-└── production_agent/       # ADK agent implementation
-    ├── __init__.py
-    └── agent.py           # Business intelligence agent with 3 tools
+├── ollama-backend/             # Ollama backend (separate deployment)
+│   └── Dockerfile             # Backend container configuration
+└── adk-agent/                 # ADK agent (separate deployment)
+    ├── pyproject.toml         # Python dependencies and project config
+    ├── Dockerfile             # Container configuration for Cloud Run
+    ├── env.template           # Environment variable template
+    ├── server.py              # FastAPI server with ADK integration
+    ├── load_test.py          # Locust load testing script
+    └── production_agent/     # ADK agent implementation
+        ├── __init__.py
+        └── agent.py         # Production Gemma agent
 ```
 
 ## 🎯 Lab Goals (60 minutes total)
