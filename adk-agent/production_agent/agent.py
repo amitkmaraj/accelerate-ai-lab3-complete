@@ -44,12 +44,13 @@ logger = logging_client.logger("production-adk-agent")
 
 
 # Configure the deployed model endpoint
-gemma_model_name = os.getenv("GEMMA_MODEL_NAME", "gemma3:4b")  # Gemma model name
+gemma_model_name = os.getenv("GEMMA_MODEL_NAME", "gemma3:270m")  # Gemma model name
+api_base = os.getenv("OLLAMA_API_BASE", "localhost:10010")  # Location of Ollama server
 
 # Production Gemma Agent - GPU-accelerated conversational assistant
-gemma_agent = Agent(
-    model=LiteLlm(model=f"ollama_chat/{gemma_model_name}"),
-    name="gemma_agent",
+production_agent = Agent(
+    model=LiteLlm(model=f"ollama_chat/{gemma_model_name}", api_base=api_base),
+    name="production_agent",
     description="A production-ready conversational assistant powered by GPU-accelerated Gemma.",
     instruction="""You are 'Gem', a friendly, knowledgeable, and enthusiastic zoo tour guide. 
     Your main goal is to make a zoo visit more fun and educational for guests by answering their questions.
@@ -69,4 +70,4 @@ gemma_agent = Agent(
 )
 
 # Set as root agent
-root_agent = gemma_agent
+root_agent = production_agent
