@@ -64,7 +64,7 @@ Let's first explore the agent we'll be deploying:
 - **`adk-agent/production_agent/agent.py`**: Production Gemma agent with conversational capabilities
 - **`adk-agent/server.py`**: FastAPI server with health checks and feedback endpoints
 - **`adk-agent/Dockerfile`**: Container configuration for Cloud Run deployment
-- **`adk-agent/load_test.py`**: Locust-based load testing script
+- **`adk-agent/elasticity_test.py`**: Locust-based load testing script
 
 ### Part 2: Local Development and Testing (15 minutes)
 
@@ -179,7 +179,7 @@ gcloud run deploy production-adk-agent \
     --cpu 2 \
     --gpu 1 \
     --gpu-type nvidia-l4 \
-    --max-instances 5 \
+    --max-instances 3 \
     --min-instances 1 \
     --concurrency 10 \
     --timeout 300 \
@@ -194,7 +194,7 @@ gcloud run deploy production-adk-agent \
 
 - **GPU**: NVIDIA L4 GPU for AI model acceleration
 - **Memory/CPU**: Sufficient resources for AI workloads
-- **Scaling**: Auto-scaling between 1-5 instances
+- **Scaling**: Auto-scaling between 1-3 instances
 - **Concurrency**: Handle up to 10 concurrent requests per instance
 - **Environment Variables**: Production configuration
 
@@ -237,43 +237,31 @@ Try both agents' capabilities:
 - "Explain quantum computing in simple terms"
 - "Tell me about renewable energy benefits"
 
-### Part 6: Load Testing and Performance Validation (10 minutes)
+### Part 6: Elasticity Testing and Performance Validation (10 minutes)
 
-Load testing ensures your agent can handle production traffic:
+Elasticity testing ensures your agent can handle production traffic:
 
-#### 1. Run Load Tests
+#### 1. Run Elasticity Tests
 
 ```bash
 # Create results directory
 mkdir -p .results
 
-# Run comprehensive load test
-locust -f load_test.py \
+# Run comprehensive elasticity test
+locust -f elasticity_test.py \
     -H $SERVICE_URL \
     --headless \
     -t 60s \
     -u 20 \
-    -r 2 \
-    --csv=.results/results \
-    --html=.results/report.html
+    -r 2 
 ```
 
-**Load Test Configuration:**
+**Elasticity Test Configuration:**
 
 - **Duration**: 60 seconds
 - **Users**: 20 concurrent users
 - **Spawn Rate**: 2 users per second
 - **Scenarios**: Gemma conversations, health checks, performance validation
-
-#### 2. Analyze Results
-
-```bash
-# View the HTML report
-open .results/report.html
-
-# Check CSV results
-cat .results/results_stats.csv
-```
 
 **Key Metrics to Monitor:**
 
